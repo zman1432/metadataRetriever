@@ -3,7 +3,7 @@ Setup:
 1. Link against the AudioToolbox framework 
 2. Add #import metadataRetriever.h  
 
-Usage: NSArray *metadataArray = [metadataRetriever getMetadataForFile:@/path/to/file/];
+Usage: NSArray *metadataArray = [metadataRetriever getMetadataForFile:@"/path/to/file/"];
 
 this returns an array with the artist, song, and album info (in that order)  
 
