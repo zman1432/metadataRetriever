@@ -52,6 +52,7 @@
         ilim = id3DataSize;
     }
     
+    // prints the raw ID3 tag to the debugger, for debugging puposes
     /*for (int i=0; i < ilim; i++) {
         if( rawID3Tag[i] < 32 ) {
             printf( "." );
