@@ -1,69 +1,73 @@
 //
 //  metadataRetriever.m
-//  SwiftLoad
+//  metadataRetriever
 //
 //  Created by Nathaniel Symer on 12/20/11.
-//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
+//  Do whatever you want with this, just don't pass it 
+//  off as your own or sell it.
 //
 
 #import "metadataRetriever.h"
 #import <CoreFoundation/CoreFoundation.h>
+#import <AudioToolbox/AudioToolbox.h>
 
 @implementation metadataRetriever
 
 + (NSArray *)getMetadataForFile:(NSString *)filePath {
     
-    NSURL *fileURL = [NSURL fileURLWithPath:filePath];
+    NSURL *fileURL = [[NSURL alloc]initFileURLWithPath:filePath];
     
-    AudioFileID fileID  = nil;
-    OSStatus err        = noErr;
+    AudioFileID fileID = nil;
+    OSStatus err = noErr;
     
-    err = AudioFileOpenURL( (CFURLRef) fileURL, kAudioFileReadPermission, 0, &fileID );
+    err = AudioFileOpenURL((CFURLRef)fileURL, kAudioFileReadPermission, 0, &fileID);
     if (err != noErr) {
         NSLog(@"AudioFileOpenURL failed");
+        return [[[NSArray alloc]initWithObjects:@"---", @"---", @"---", nil]autorelease];
     }
     
-    UInt32 id3DataSize  = 0;
-    char * rawID3Tag    = NULL;
+    UInt32 id3DataSize = 0;
+    char *rawID3Tag = NULL;
     
-    err = AudioFileGetPropertyInfo( fileID, kAudioFilePropertyID3Tag, &id3DataSize, NULL );
+    err = AudioFileGetPropertyInfo(fileID, kAudioFilePropertyID3Tag, &id3DataSize, NULL);
     if (err != noErr) {
-        NSLog(@"AudioFileGetPropertyInfo failed for ID3 tag");
+        NSLog(@"AudioFileGetPropertyInfo failed");
+        return [[[NSArray alloc] initWithObjects:@"---", @"---", @"---", nil]autorelease];
     }
     
-    rawID3Tag = (char *) malloc(id3DataSize);
+    rawID3Tag = (char *)malloc(id3DataSize);
     if (rawID3Tag == NULL) {
-        NSLog(@"could not allocate %lu bytes of memory for ID3 tag", id3DataSize);
+        NSLog(@"Couldn't allocate %lu bytes of memory for the ID3 tag", id3DataSize);
+        return [[[NSArray alloc] initWithObjects:@"---", @"---", @"---", nil]autorelease];
     }
     
     err = AudioFileGetProperty(fileID, kAudioFilePropertyID3Tag, &id3DataSize, rawID3Tag);
     if (err != noErr) {
         NSLog(@"AudioFileGetProperty failed for ID3 tag");
+        return [[[NSArray alloc] initWithObjects:@"---", @"---", @"---", nil]autorelease];
     }
     
     int ilim = 100;
     if (ilim > id3DataSize) {
         ilim = id3DataSize;
     }
-    for (int i=0; i < ilim; i++) {
+    
+    /*for (int i=0; i < ilim; i++) {
         if( rawID3Tag[i] < 32 ) {
             printf( "." );
         } else {
             printf( "%c", rawID3Tag[i] );
         }
-    }
+    }*/
     
     UInt32 id3TagSize = 0;
     UInt32 id3TagSizeLength = 0;
-    err = AudioFormatGetProperty( kAudioFormatProperty_ID3TagSize, 
-                                 id3DataSize, 
-                                 rawID3Tag, 
-                                 &id3TagSizeLength, 
-                                 &id3TagSize
-                                 );
-    if( err != noErr ) {
+    err = AudioFormatGetProperty(kAudioFormatProperty_ID3TagSize, id3DataSize, rawID3Tag, &id3TagSizeLength, &id3TagSize);
+    
+    
+    if(err != noErr) {
         NSLog(@"AudioFormatGetProperty failed for ID3 tag size");
-        switch( err ) {
+        switch(err) {
             case kAudioFormatUnspecifiedError:
                 NSLog(@"err: audio format unspecified error" ); 
                 break;
@@ -86,14 +90,16 @@
                 NSLog(@"err: some other audio format error"); 
                 break;
         }
+        return [[[NSArray alloc] initWithObjects:@"---", @"---", @"---", nil]autorelease];
     }
     
     CFDictionaryRef piDict = nil;
     UInt32 piDataSize = sizeof(piDict);
     
-    err = AudioFileGetProperty( fileID, kAudioFilePropertyInfoDictionary, &piDataSize, &piDict );
+    err = AudioFileGetProperty(fileID, kAudioFilePropertyInfoDictionary, &piDataSize, &piDict);
     if(err != noErr) {
-        NSLog(@"AudioFileGetProperty failed for property info dictionary");
+        NSLog(@"AudioFileGetProperty failed for the property: InfoDictionary");
+        return [[[NSArray alloc] initWithObjects:@"---", @"---", @"---", nil]autorelease];
     }
     
     
@@ -113,7 +119,7 @@
     BOOL albumIsNil = [album isEqualToString:@"(null)"];
     BOOL songIsNil = [song isEqualToString:@"(null)"];
     
-    NSMutableArray *initArray = [NSMutableArray arrayWithCapacity:10];
+    NSMutableArray *initArray = [[NSMutableArray alloc]initWithCapacity:10];
     if (artistIsNil) {
         [initArray addObject:artistNil];
     } else {
@@ -134,21 +140,10 @@
     CFRelease(piDict);
     free(rawID3Tag);
     
-    NSArray *theArray = [NSArray arrayWithArray:initArray];
+    NSArray *theArray = [[NSArray alloc]initWithArray:initArray];
+    [initArray release];
     
-    return theArray;
-}
-
-+ (NSString *)artistForMetadataArray:(NSArray *)array {
-    return [array objectAtIndex:0];
-}
-
-+ (NSString *)songForMetadataArray:(NSArray *)array {
-    return [array objectAtIndex:1];
-}
-
-+ (NSString *)albumForMetadataArray:(NSArray *)array {
-    return [array objectAtIndex:2];
+    return [theArray autorelease];
 }
 
 @end

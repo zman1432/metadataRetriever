@@ -1,0 +1,13 @@
+metadataRetriever - get the ID3 data of any unencrypted mp3 file.
+Supports both Mac OSX and iOS
+
+Setup: 
+1. Link against the AudioToolbox framework 
+2. #import metadataRetriever.h  
+
+Usage: 
+NSArray *metadataArray = [metadataRetriever getMetadataForFile:@/path/to/file.mp3]; // Returns an array containing NSStrings (artist, song, album)
+
+NSString *artist = [metadataArray objectAtIndex:0]; // the artist NSString is at the index of 0
+NSString *song = [metadataArray objectAtIndex:1]; // the song NSString is at the index of 1
+NSString *album = [metadataArray objectAtIndex:2]; // the album NSString is at the index of 2

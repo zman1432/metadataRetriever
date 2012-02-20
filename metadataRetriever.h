@@ -3,21 +3,15 @@
 //  SwiftLoad
 //
 //  Created by Nathaniel Symer on 12/20/11.
-//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
+//  Do whatever you want with this, just don't pass it 
+//  off as your own or sell it.
 //
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import <AudioToolbox/AudioToolbox.h>
 
 @interface metadataRetriever : NSObject
 
 + (NSArray *)getMetadataForFile:(NSString *)filePath;
-
-+ (NSString *)artistForMetadataArray:(NSArray *)array;
-
-+ (NSString *)songForMetadataArray:(NSArray *)array;
-
-+ (NSString *)albumForMetadataArray:(NSArray *)array;
 
 @end
